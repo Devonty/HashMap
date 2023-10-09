@@ -3,39 +3,33 @@ package ru.vsu.cs.OOP2023.elfimov_a_m;
 import java.util.*;
 
 public class MyHashMap<K, V> implements Map<K, V> {
-    private static class Pair<K, V> {
-        K key;
-        V value;
-        Pair<K, V> next = null;
+    private static class Pair<Kp, Vp> {
+        Kp key;
+        Vp value;
+        Pair<Kp, Vp> next = null;
 
-        public Pair(K key, V value) {
+        public Pair(Kp key, Vp value) {
             this.key = key;
             this.value = value;
         }
     }
 
     private int pairCount = 0;
-    private final int startSizeHashTable = 17;
-    private List<Pair<K, V>> hashTable;
+    private final int START_HASHTABLE_SIZE = 17;
+    private Pair<K, V>[] hashTable;
 
     public MyHashMap() {
-        hashTable = new ArrayList<>();
-        for (int i = 0; i < startSizeHashTable; i++) {
-            hashTable.add(null);
-        }
+
+        hashTable = new Pair[START_HASHTABLE_SIZE];
     }
 
     private final Set<K> keySet = new HashSet<>();
     private final Set<V> valueSet = new HashSet<>();
     private void becomeNewSize() {
-        List<Pair<K, V>> oldList = hashTable;
-        int newSize = hashTable.size() * 2 + 1;
-        hashTable =  new ArrayList<>(newSize);
+        Pair<K, V>[] oldList = hashTable;
+        int newSize = hashTable.length * 2 + 1;
+        hashTable =  new Pair[newSize];
         pairCount = 0;
-
-        for (int i = 0; i < newSize; i++) {
-            hashTable.add(null);
-        }
         for (Pair<K, V> pairKV : oldList) {
             while (pairKV != null) {
                 this.put(pairKV.key, pairKV.value);
@@ -63,7 +57,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     private int getHash(Object key) {
         int hash = key.hashCode();
-        return hash % hashTable.size();
+        return hash % hashTable.length;
     }
 
 
@@ -90,7 +84,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public V get(Object o) {
         int hash = getHash(o);
-        Pair<K, V> pairKV = hashTable.get(hash);
+        Pair<K, V> pairKV = hashTable[hash];
         while (pairKV != null) {
             if (pairKV.key.equals(o)) return pairKV.value;
             pairKV = pairKV.next;
@@ -103,16 +97,16 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public V put(K k, V v) {
         assert k != null && v != null;
 
-        if(pairCount == hashTable.size()) becomeNewSize();
+        if(pairCount == hashTable.length) becomeNewSize();
 
         int hash = getHash(k);
-        Pair<K, V> pairKV = hashTable.get(hash);
+        Pair<K, V> pairKV = hashTable[hash];
 
         keySet.add(k);
         valueSet.add(v);
         // First pair
         if (pairKV == null) {
-            hashTable.set(hash, new Pair<>(k, v));
+            hashTable[hash] = new Pair<>(k, v);
 
             pairCount++;
             return null;
@@ -137,12 +131,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public V remove(Object o) {
         int hash = getHash(o);
-        Pair<K, V> pairKV = hashTable.get(hash);
+        Pair<K, V> pairKV = hashTable[hash];
         // null check
         if (pairKV == null) return null;
         // check first pair
         if (pairKV.key.equals(o)) {
-            hashTable.set(hash, pairKV.next);
+            hashTable[hash] = pairKV.next;
 
             pairCount--;
             recalculateSets();
@@ -173,7 +167,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
         valueSet.clear();
         keySet.clear();
         pairCount = 0;
-        hashTable = new ArrayList<>(startSizeHashTable);
+        hashTable = new Pair[START_HASHTABLE_SIZE];
     }
 
     @Override
