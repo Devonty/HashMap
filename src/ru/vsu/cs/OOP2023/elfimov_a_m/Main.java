@@ -9,23 +9,24 @@ public class Main {
         print(map);
 
         System.out.println("\nadd--");
-        map.put("Bottle", 10);
-        map.put("Pen", 15);
-        map.put("Ball", 100);
-        map.put("Cake", 23);
+        System.out.println("map.put(\"Bottle\", 10): " + map.put("Bottle", 10));
+        System.out.println("map.put(\"Pen\", 15): " + map.put("Pen", 15));
+        System.out.println("map.put(\"Ball\", 100): " + map.put("Ball", 100));
+        System.out.println("map.put(\"Cake\", 23): " + map.put("Cake", 23));
+        System.out.println("map.put(\"Cake\", 46): " + map.put("Cake", 46)); // вернет старое значение
         print(map);
 
         System.out.println("\nremove--");
-        map.remove("Bottle");
-        map.remove("Bottle"); // will be ignored
+        System.out.println("map.remove(\"Bottle\"): " + map.remove("Bottle"));
+        System.out.println("map.remove(\"Bottle\"): " + map.remove("Bottle")); // вернет null, т.к. ключ уже удален
         print(map);
 
 
     }
 
-    public static void print(Map<String , Integer> map) {
+    public static <K, V> void print(Map<K , V> map) {
         System.out.println("Size: " + map.size());
-        for (Object key : map.keySet()) {
+        for (K key : map.keySet()) {
             System.out.println(key + " - " + map.get(key));
         }
     }
