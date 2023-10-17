@@ -1,5 +1,7 @@
 package ru.vsu.cs.OOP2023.elfimov_a_m;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -14,13 +16,13 @@ public class Main {
         System.out.println("map.put(\"Ball\", 100): " + map.put("Ball", 100));
         System.out.println("map.put(\"Cake\", 23): " + map.put("Cake", 23));
         System.out.println("map.put(\"Cake\", 46): " + map.put("Cake", 46)); // вернет старое значение
+        System.out.println("map.put(null, 46): " + map.put("null", null)); // вернет старое значение
         print(map);
 
         System.out.println("\nremove--");
         System.out.println("map.remove(\"Bottle\"): " + map.remove("Bottle"));
         System.out.println("map.remove(\"Bottle\"): " + map.remove("Bottle")); // вернет null, т.к. ключ уже удален
         print(map);
-
 
     }
 
