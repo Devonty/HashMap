@@ -45,6 +45,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
         }
     }
 
+
     private int entryCount = 0;
     private final int START_HASHTABLE_SIZE = 17;
     private List<Entry<K, V>>[] hashTable;
@@ -77,6 +78,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     private int getHash(Object key) {
+        if(key == null) return 0;
         int hash = key.hashCode();
         return hash % hashTable.length;
     }
@@ -140,7 +142,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public V remove(Object o) {
         Entry<K, V> entryKV = getNode(o);
         if(entryKV == null) return null;
-        
+
         entryCount--;
         hashTable[getHash(o)].remove(entryKV);
         return entryKV.value;
