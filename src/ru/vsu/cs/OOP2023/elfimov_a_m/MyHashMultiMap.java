@@ -2,101 +2,69 @@ package ru.vsu.cs.OOP2023.elfimov_a_m;
 
 import java.util.*;
 
-public class MyHashMultiMap<K, V> implements Map<K, V> {
-    private static class Entry<K, V> {
-        protected K key;
-        protected List<V> valueList;
-        protected Entry<K, V> next = null;
-
-        public Entry(K key, V value) {
-            this.key = key;
-            this.valueList = new ArrayList<>();
-            this.valueList.add(value);
-        }
-
-        public K getKey() {
-            return key;
-        }
-
-        public List<V> getValueList() {
-            return valueList;
-        }
-
-        public List<V> setValueList(List<V> v) {
-            List<V> valueListSave = this.valueList;
-            this.valueList = v;
-            return valueListSave;
-        }
-    }
-
-    private int entryCount = 0;
-    private final int START_HASHTABLE_SIZE = 17;
-    private Entry<K, V>[] hashTable;
+public class MyHashMultiMap<K, V> {
+    private MyHashMap<K, LinkedList<V>> map;
 
     public MyHashMultiMap() {
-        hashTable = new MyHashMultiMap.Entry[START_HASHTABLE_SIZE];
+        map = new MyHashMap<>();
     }
 
-    private final Set<K> keySet = new HashSet<>();
-    private final Set<V> valueSet = new HashSet<>();
+    public MyHashMultiMap(int initSize) {
+        map = new MyHashMap<>(initSize);
+    }
 
-    @Override
+
     public int size() {
-        return 0;
+        return map.size();
     }
 
-    @Override
+
     public boolean isEmpty() {
-        return false;
+        return map.isEmpty();
     }
 
-    @Override
+
     public boolean containsKey(Object o) {
-        return false;
+        return map.containsKey(o);
     }
 
-    @Override
-    public boolean containsValue(Object o) {
-        return false;
+    public List<V> get(Object key) {
+        return map.get(key);
     }
 
-    @Override
-    public V get(Object o) {
-        return null;
+    public List<V> getOrDefault(Object key, LinkedList<V> defaultValue) {
+        return map.getOrDefault(key, defaultValue);
     }
 
-    @Override
-    public V put(K k, V v) {
-        return null;
+    public void put(K key, V value) {
+        LinkedList<V> values = map.get(key);
+        values.add(value);
+        map.put(key, values);
     }
 
-    @Override
-    public V remove(Object o) {
-        return null;
+    public List<V> remove(Object key) {
+        return map.remove(key);
     }
 
-    @Override
-    public void putAll(Map<? extends K, ? extends V> map) {
-
+    public boolean removeValue(Object key, Object value) {
+        return map.get(key).remove(value);
     }
 
-    @Override
+
     public void clear() {
-
+        map.clear();
     }
 
-    @Override
+
     public Set<K> keySet() {
-        return null;
+        return map.keySet();
     }
 
-    @Override
-    public Collection<V> values() {
-        return null;
+    public Collection<LinkedList<V>> values() {
+        return map.values();
     }
 
-    @Override
-    public Set<Map.Entry<K, V>> entrySet() {
-        return null;
+    public Set<Map.Entry<K, LinkedList<V>>> entrySet() {
+        return map.entrySet();
     }
 }
