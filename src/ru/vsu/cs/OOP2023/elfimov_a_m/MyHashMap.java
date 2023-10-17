@@ -6,11 +6,15 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private static class Entry<K, V> implements Map.Entry<K, V> {
         protected K key;
         protected V value;
-        protected Entry<K, V> next = null;
 
         public Entry(K key, V value) {
             this.key = key;
             this.value = value;
+        }
+
+        public Entry(Entry<K, V> entryKV) {
+            this.key = entryKV.key;
+            this.value = entryKV.value;
         }
 
         @Override
@@ -29,47 +33,47 @@ public class MyHashMap<K, V> implements Map<K, V> {
             this.value = v;
             return valueSave;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            try {
+                Entry<K,V> entryKV = (Entry<K, V>) obj;
+                return entryKV.value == this.value && entryKV.key == this.key;
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
     }
 
     private int entryCount = 0;
     private final int START_HASHTABLE_SIZE = 17;
-    private Entry<K, V>[] hashTable;
+    private List<Entry<K, V>>[] hashTable;
 
     public MyHashMap() {
-        hashTable = new Entry[START_HASHTABLE_SIZE];
+        initHashTable(START_HASHTABLE_SIZE);
+    }
+    public MyHashMap(int initSize) {
+        initHashTable(initSize);
     }
 
-    private final Set<K> keySet = new HashSet<>();
-    private final Set<V> valueSet = new HashSet<>();
-
+    private void initHashTable(int size){
+        hashTable = new LinkedList[size];
+        for (int i = 0; i < size; i++) {
+            hashTable[i] = new LinkedList<Entry<K,V>>();
+        }
+    }
     private void becomeNewSize() {
-        Entry<K, V>[] oldList = hashTable;
+        List<Entry<K, V>>[] oldList = hashTable;
+
         int newSize = hashTable.length * 2 + 1;
-        hashTable = new Entry[newSize];
+        initHashTable(newSize);
+
         entryCount = 0;
-        for (Entry<K, V> entryKV : oldList) {
-            while (entryKV != null) {
-                this.put(entryKV.key, entryKV.value);
-                entryKV = entryKV.next;
-            }
+
+        for (Map.Entry<K, V> entryKV : this.entrySet()) {
+            this.put(entryKV.getKey(), entryKV.getValue());
         }
 
-    }
-
-    private void recalculateSets() {
-        keySet.clear();
-        valueSet.clear();
-
-        Entry<K, V> entryKV;
-        for (Entry<K, V> kvEntry : hashTable) {
-            entryKV = kvEntry;
-            while (entryKV != null) {
-                keySet.add(entryKV.key);
-                valueSet.add(entryKV.value);
-
-                entryKV = entryKV.next;
-            }
-        }
     }
 
     private int getHash(Object key) {
@@ -90,88 +94,56 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object o) {
-        return keySet.contains(o);
+        return false;
     }
 
     @Override
     public boolean containsValue(Object o) {
-        return valueSet.contains(o);
+        return false;
+    }
+
+    private Entry<K, V> getNode(Object key) {
+        for (Entry<K, V> entryKV : hashTable[getHash(key)])
+            if (entryKV.key.equals(key)) return entryKV;
+        return null;
     }
 
     @Override
-    public V get(Object o) {
-        int hash = getHash(o);
-        Entry<K, V> entryKV = hashTable[hash];
-        while (entryKV != null) {
-            if (entryKV.key.equals(o)) return entryKV.value;
-            entryKV = entryKV.next;
-        }
-        // throw new IllegalArgumentException("Don't have key: " + o.toString());
-        return null;
+    public V get(Object key) {
+        Entry<K, V> e;
+        return (e = this.getNode(key)) == null ? null : e.value;
+    }
+
+    @Override
+    public V getOrDefault(Object key, V defaultValue) {
+        Entry<K, V> e;
+        return (e = this.getNode(key)) == null ? defaultValue : e.value;
     }
 
     @Override
     public V put(K k, V v) {
-        assert k != null && v != null;
-
         if (entryCount == hashTable.length) becomeNewSize();
+        Entry<K, V> entryKV = getNode(k);
 
-        int hash = getHash(k);
-        Entry<K, V> entryKV = hashTable[hash];
-
-        keySet.add(k);
-        valueSet.add(v);
-        // First pair
         if (entryKV == null) {
-            hashTable[hash] = new Entry<>(k, v);
-
             entryCount++;
+            hashTable[getHash(k)].add(new Entry<>(k, v));
             return null;
         }
-        // Search for pair
-        while (true) {
-            if (entryKV.key.equals(k)) {
-                V old = entryKV.value;
-                entryKV.value = v;
-                return old;
-            }
-            if (entryKV.next == null) break;
-            entryKV = entryKV.next;
-        }
-        // pairKV is last now
-        // add new pair
-        entryKV.next = new Entry<>(k, v);
-        entryCount++;
-        return null;
+
+        V oldValue = entryKV.value;
+        entryKV.value = v;
+        return oldValue;
     }
 
     @Override
     public V remove(Object o) {
-        int hash = getHash(o);
-        Entry<K, V> entryKV = hashTable[hash];
-        // null check
-        if (entryKV == null) return null;
-        // check first pair
-        if (entryKV.key.equals(o)) {
-            hashTable[hash] = entryKV.next;
-
-            entryCount--;
-            recalculateSets();
-            return entryKV.value;
-        }
-        // check for next from pairKV
-        while (entryKV.next != null) {
-            if (entryKV.next.key.equals(o)) {
-                entryKV.next = entryKV.next.next;
-
-                entryCount--;
-                recalculateSets();
-                return entryKV.next.value;
-            }
-            entryKV = entryKV.next;
-        }
-        // else
-        return null;
+        Entry<K, V> entryKV = getNode(o);
+        if(entryKV == null) return null;
+        
+        entryCount--;
+        hashTable[getHash(o)].remove(entryKV);
+        return entryKV.value;
     }
 
     @Override
@@ -183,33 +155,40 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public void clear() {
-        valueSet.clear();
-        keySet.clear();
         entryCount = 0;
-        hashTable = new Entry[START_HASHTABLE_SIZE];
+        initHashTable(START_HASHTABLE_SIZE);
     }
 
     @Override
     public Set<K> keySet() {
-        return new HashSet<>(keySet);
+        Set<K> toReturn = new HashSet<>(entryCount);
+
+        for (List<Entry<K, V>> entries : hashTable)
+            for (Entry<K, V> entryKV : entries)
+                toReturn.add(entryKV.key);
+
+        return toReturn;
     }
 
     @Override
     public Collection<V> values() {
-        return new HashSet<>(valueSet);
+        List<V> toReturn = new ArrayList<>(entryCount);
+
+        for (List<Entry<K, V>> entries : hashTable)
+            for (Entry<K, V> entryKV : entries)
+                toReturn.add(entryKV.value);
+
+        return toReturn;
     }
 
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        Set<Map.Entry<K, V>> set = new HashSet<>();
-        for (int i = 0; i <hashTable.length; i++) {
-            Entry<K, V> entryKV = hashTable[i];
-            while (entryKV != null) {
-                set.add(entryKV);
-                entryKV = entryKV.next;
-            }
-        }
-        return set;
+        Set<Map.Entry<K, V>> toReturn = new HashSet<>(entryCount);
+
+        for (List<Entry<K, V>> entries : hashTable)
+            for (Entry<K, V> entryKV : entries)
+                toReturn.add((Map.Entry<K, V>)entryKV);
+        return toReturn;
     }
 }
 
