@@ -1,5 +1,6 @@
 package ru.vsu.cs.OOP2023.elfimov_a_m;
 
+import java.security.Key;
 import java.util.*;
 
 public class MyHashMultiMap<K, V> {
@@ -28,6 +29,11 @@ public class MyHashMultiMap<K, V> {
         return map.containsKey(o);
     }
 
+
+    public boolean containsValue(Object o) {
+        return false;
+    }
+
     public List<V> get(Object key) {
         return map.get(key);
     }
@@ -38,6 +44,8 @@ public class MyHashMultiMap<K, V> {
 
     public void put(K key, V value) {
         LinkedList<V> values = map.get(key);
+        if(values == null) values = new LinkedList<>();
+
         values.add(value);
         map.put(key, values);
     }
@@ -47,14 +55,15 @@ public class MyHashMultiMap<K, V> {
     }
 
     public boolean removeValue(Object key, Object value) {
-        return map.get(key).remove(value);
+        boolean toReturn =  map.get(key).remove(value);
+        if(map.get(key).isEmpty()) map.remove(key);
+        return toReturn;
     }
 
 
     public void clear() {
         map.clear();
     }
-
 
     public Set<K> keySet() {
         return map.keySet();
