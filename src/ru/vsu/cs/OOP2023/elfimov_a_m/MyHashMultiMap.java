@@ -5,6 +5,7 @@ import java.util.*;
 
 public class MyHashMultiMap<K, V> {
     private MyHashMap<K, LinkedList<V>> map;
+    private int size = 0;
 
     public MyHashMultiMap() {
         map = new MyHashMap<>();
@@ -16,12 +17,12 @@ public class MyHashMultiMap<K, V> {
 
 
     public int size() {
-        return map.size();
+        return size;
     }
 
 
     public boolean isEmpty() {
-        return map.isEmpty();
+        return size == 0;
     }
 
 
@@ -31,6 +32,9 @@ public class MyHashMultiMap<K, V> {
 
 
     public boolean containsValue(Object o) {
+        for(K key : map.keySet()){
+            if(map.get(key).contains(o)) return true;
+        }
         return false;
     }
 
@@ -46,31 +50,43 @@ public class MyHashMultiMap<K, V> {
         LinkedList<V> values = map.get(key);
         if(values == null) values = new LinkedList<>();
 
+        size++;
         values.add(value);
         map.put(key, values);
     }
 
     public List<V> remove(Object key) {
+        List<V> values;
+        size -= (values = map.get(key)) == null ? 0 : values.size();
         return map.remove(key);
     }
 
     public boolean removeValue(Object key, Object value) {
         boolean toReturn =  map.get(key).remove(value);
         if(map.get(key).isEmpty()) map.remove(key);
+        if(toReturn) size--;
         return toReturn;
     }
 
 
     public void clear() {
         map.clear();
+        size = 0;
     }
 
     public Set<K> keySet() {
         return map.keySet();
     }
 
-    public Collection<LinkedList<V>> values() {
+    public Collection<LinkedList<V>> valueLists() {
         return map.values();
+    }
+    public Collection<V> values(){
+        Collection<V> col = new ArrayList<>(size);
+        for(K key : map.keySet()){
+            col.addAll(map.get(key));
+        }
+        return col;
     }
 
     public Set<Map.Entry<K, LinkedList<V>>> entrySet() {
