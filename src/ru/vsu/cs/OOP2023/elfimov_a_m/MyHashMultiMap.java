@@ -61,8 +61,10 @@ public class MyHashMultiMap<K, V> {
         return map.remove(key);
     }
 
+
     public boolean removeValue(Object key, Object value) {
-        boolean toReturn =  map.get(key).remove(value);
+        List<V> values = map.get(key);
+        boolean toReturn = values != null && values.remove(value);
         if(map.get(key).isEmpty()) map.remove(key);
         if(toReturn) size--;
         return toReturn;
